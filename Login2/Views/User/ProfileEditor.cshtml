@@ -1,0 +1,44 @@
+﻿@model Login2.Models.Profile
+@{
+    ViewBag.Title = "ProfileEditor";
+}
+
+
+<div>
+    <h2>Profile Editor</h2>
+    Welcome @Html.Encode(User.Identity.Name) the Profile Editor
+</div>
+<div name="editor-field">
+        @Html.DropDownListFor(p => p.Gender, new SelectList(Model.SexAndGender), "Gender")
+</div>
+
+<div>
+    <select name="sexDropDown">
+        <option value="1">Male</option>
+        <option value="2">Female</option>
+        <option value="3">Other</option>
+    </select>
+</div>
+
+<div>
+    <label>Biography</label>
+    <textarea name="bio" width="300" height="400"></textarea>
+</div>
+
+@{
+    Login2.Models.Constants constTags = new Login2.Models.Constants();
+    string TagString = constTags.Tags();
+    string[] TagArray = TagString.Split(',');
+    int i = 0;
+    foreach (var tag in TagArray)
+    {
+        <div>
+            @Html.CheckBoxFor(p => p.Tags, new {})
+        </div>
+        i++;
+
+    }
+<div>
+    <input type="submit" value="Continue" />
+</div>
+}

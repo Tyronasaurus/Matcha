@@ -1,0 +1,57 @@
+﻿@model Login2.Models.User
+@{
+    ViewBag.Title = "Register";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@using (Html.BeginForm())
+{
+    @Html.ValidationSummary(true, "Registration failed. Check your details");
+    <div>
+        <fieldset>
+            <legend>@ViewBag.Title</legend>
+            <div class="editor-label">
+                @Html.LabelFor(u => u.Email)
+            </div>
+            <div class="editor-field">
+                @Html.TextBoxFor(u => u.Email)
+                @Html.ValidationMessageFor(u => u.Email)
+            </div>
+
+            <div class="editor-label">
+                @Html.LabelFor(u => u.Username)
+            </div>
+            <div class="editor-field">
+                @Html.TextBoxFor(u => u.Username)
+                @Html.ValidationMessageFor(u => u.Username)
+            </div>
+
+            <div class="editor-label">
+                @Html.LabelFor(u => u.FirstName)
+            </div>
+            <div class="editor-field">
+                @Html.TextBoxFor(u => u.FirstName)
+                @Html.ValidationMessageFor(u => u.FirstName)
+            </div>
+
+            <div class="editor-label">
+                @Html.LabelFor(u => u.LastName)
+            </div>
+            <div class="editor-field">
+                @Html.TextBoxFor(u => u.LastName)
+                @Html.ValidationMessageFor(u => u.LastName)
+            </div>
+
+            <div class="editor-label">
+                @Html.LabelFor(u => u.Password)
+            </div>
+            <div class="editor-field">
+                @Html.PasswordFor(u => u.Password)
+                @Html.ValidationMessageFor(u => u.Password)
+            </div>
+            <input type="submit" value="Register" />
+        </fieldset>
+    </div>
+}
+
+
