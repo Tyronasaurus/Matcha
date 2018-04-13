@@ -5,6 +5,7 @@ using System.Net.Mail;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Security;
+using Login2.Models;
 
 
 namespace Login2.Controllers
@@ -33,10 +34,14 @@ namespace Login2.Controllers
         [HttpPost]
         public ActionResult Login(Models.User user)
         {
+            
             if (ModelState.IsValid)
             {
                 if (user.IsValid(user.Username, user.Password))
                 {
+                    HttpContext.Session["LoggedIn"] = true;
+                    HttpContext.Session["Username"] = user.Username;
+                    HttpContext.Session["Token"] = user.Token;
                     FormsAuthentication.SetAuthCookie(user.Username, true);
                     return RedirectToAction("Index", "Home");
                 }
@@ -66,15 +71,10 @@ namespace Login2.Controllers
             return (View(user));
         }
 
-        [HttpGet]
-        public ActionResult ProfileEditor()
-        {
-            return View();
-        }
-
         public ActionResult Logout ()
         {
             FormsAuthentication.SignOut();
+            HttpContext.Session.Clear();
             return RedirectToAction("Index", "Home");
         }
 

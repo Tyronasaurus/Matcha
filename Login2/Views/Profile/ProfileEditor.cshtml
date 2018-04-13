@@ -1,0 +1,58 @@
+﻿@model Login2.Models.BigModel
+@{
+    ViewBag.Title = "ProfileEditor";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@using (Html.BeginForm("ProfileEditor", "Profile"))
+{
+    @Html.ValidationSummary(true, "Edit failed. Check your login details");
+    <div>
+        <h2>Profile Editor</h2>
+        Welcome @Html.Encode(User.Identity.Name) the Profile Editor
+    </div>
+    <div class="editor-label">
+        @Html.LabelFor(p => p.Profile.Gender)
+    </div>
+    <div name="editor-field">
+        @Html.DropDownListFor(p => p.Profile.Gender, new SelectList(new[] { "Male", "Female", "Other" }), "--Select--")
+        @Html.HiddenFor(p => p.Profile.Gender)
+    </div>
+
+    <div class="editor-label">
+        @Html.LabelFor(p => p.Profile.SexPref)
+    </div>
+    <div name="editor-field">
+        @Html.DropDownListFor(p => p.Profile.SexPref, new SelectList(new[] { "Male", "Female", "Other" }), "--Select--")
+    </div>
+
+    <div class="editor-label">
+        @Html.LabelFor(p => p.Profile.Bio)
+    </div>
+    <div class="editor-field">
+        @Html.TextAreaFor(p => p.Profile.Bio, new { placeholder = "Tell us about yourself" })
+    </div>
+    <div class="editor-label">
+        @Html.LabelFor(p => p.Profile.Tags)
+    </div>
+
+    <table>
+    @for (int i = 0; i < Model.ProfileTagsList.DBTags.Count; i++)
+    {
+        <tr>
+            <td>
+                @Html.CheckBoxFor(x => x.ProfileTagsList.DBTags[i].IsSelected)
+            </td>
+            <td>
+                @Html.HiddenFor(x => x.ProfileTagsList.DBTags[i].TagName)
+                @Model.ProfileTagsList.DBTags[i].TagName
+            </td>
+        </tr>
+    }
+
+    </table>
+
+    <div>
+        <input type="submit" value="Continue" />
+    </div>
+}

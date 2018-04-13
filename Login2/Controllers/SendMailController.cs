@@ -14,7 +14,7 @@ namespace Login2.Controllers
 
         [HttpPost]
         [ActionName("sendmail")]
-        public IHttpActionResult processAuthEmail(SendMail mailModel)
+        public IHttpActionResult ProcessAuthEmail(SendMail mailModel)
         {
             MailMessage msg = new MailMessage();
 
@@ -37,7 +37,9 @@ namespace Login2.Controllers
                 msg.Dispose();
                 return Ok("Mail sent");
             }
+#pragma warning disable CS0168 // Variable is declared but never used
             catch (Exception e)
+#pragma warning restore CS0168 // Variable is declared but never used
             {
                 return (NotFound());
             }
