@@ -28,25 +28,48 @@ namespace Login2.Models
 
         public bool IsValid(string _username, string _password)
         {
-            using (var cn = new SqlConnection(Constants.ConnString))
+            SqlDataReader reader = null;
+            SqlConnection cn = null;
+            SqlCommand cmd = null;
+            HttpContext context = HttpContext.Current;
+
+            try
             {
+                cn = new SqlConnection(Constants.ConnString);
                 string _sql = @"SELECT [username] FROM [dbo].[Users] WHERE [username] = @user AND [password] = @pass";
-                var cmd = new SqlCommand(_sql, cn);
+                cmd = new SqlCommand(_sql, cn);
                 cmd.Parameters.AddWithValue("@user", _username);
                 cmd.Parameters.AddWithValue("@pass", Helpers.SHA1.Encode(_password));
                 cn.Open();
-                var reader = cmd.ExecuteReader();
+                reader = cmd.ExecuteReader();
 
                 if (reader.HasRows)
                 {
+                    reader.Read();
+                    context.Session["userid"] = reader["id"];
                     return true;
                 }
                 else
-                { 
+                {
                     return false;
                 }
             }
+            catch (Exception ex)
+            {
+                // Print error message
+                System.Diagnostics.Debug.WriteLine(ex.Message);
+                return false;
+            }
+            finally
+            {
+                if (reader != null)
+                    reader.Close();
+
+                if (cn.State == ConnectionState.Open)
+                    cn.Close();
+            }
         }
+ 
 
         //-----REGISTER-----\\
 

@@ -5,6 +5,7 @@ using System.Web;
 using System.Web.Mvc;
 using System.Data.SqlClient;
 using Login2.Models;
+using System.Data;
 
 namespace Login2.Controllers
 {
@@ -69,7 +70,15 @@ namespace Login2.Controllers
                     }
                 }
                 profile.Tags = profileTags;
-                profile.AddProfToDB(profile);
+                bool Added = profile.AddProfToDB(profile);
+                if (Added == true)
+                {
+                    return RedirectToAction("ProfileView", "Profile");
+                }
+                else
+                {
+                    return RedirectToAction("Index", "Home");
+                }
 
             }
             
@@ -79,6 +88,36 @@ namespace Login2.Controllers
         [HttpGet]
         public ActionResult ProfileView ()
         {
+            SqlDataReader reader = null;
+            SqlConnection cn = null;
+            SqlCommand cmd = null;
+ 
+            if (Session["id"] != null)
+            {
+                try
+                {
+                    cn = new SqlConnection(Constants.ConnString);
+                    string _sql = @"SELECT * FROM [dbo].[Profile] WHERE user = @userid";
+                    cmd = new SqlCommand(_sql, cn);
+                    cmd.Parameters.AddWithValue("@userid", Session["id"]);
+                    cn.Open();
+                    reader = cmd.ExecuteReader();
+
+
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine(ex);
+                }
+                finally
+                {
+                    if (reader != null)
+                        reader.Close();
+
+                    if (cn.State == ConnectionState.Open)
+                        cn.Close();
+                }
+            }
             return View();
         }
 

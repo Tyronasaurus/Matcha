@@ -39,9 +39,9 @@ namespace Login2.Controllers
             {
                 if (user.IsValid(user.Username, user.Password))
                 {
-                    HttpContext.Session["LoggedIn"] = true;
-                    HttpContext.Session["Username"] = user.Username;
-                    HttpContext.Session["Token"] = user.Token;
+                    Session["LoggedIn"] = true;
+                    Session["Username"] = user.Username;
+                    Session["Token"] = user.Token;
                     FormsAuthentication.SetAuthCookie(user.Username, true);
                     return RedirectToAction("Index", "Home");
                 }
@@ -74,7 +74,7 @@ namespace Login2.Controllers
         public ActionResult Logout ()
         {
             FormsAuthentication.SignOut();
-            HttpContext.Session.Clear();
+            Session.Clear();
             return RedirectToAction("Index", "Home");
         }
 

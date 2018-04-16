@@ -34,8 +34,9 @@ namespace Login2.Models
         public List<ProfileTags> Tags { get; set; }
 
 
-        public void AddProfToDB(Profile profile)
+        public bool AddProfToDB(Profile profile)
         {
+            HttpContext context = HttpContext.Current;
             var constants = new Constants();
             string stringTags = profile.Tags[0].TagName;
             var listTags = profile.Tags;
@@ -43,36 +44,45 @@ namespace Login2.Models
             {
                 stringTags += "," + listTags[i].TagName;
             }
-            if (HttpContext.Session["LoggedIn"])
+            var isLogged = context.Session["LoggedIn"];
+            if (isLogged != null)
             {
 
                 using (var cn = new SqlConnection(Constants.ConnString))
                 {
-                    string _sql = (@"SELECT * FROM [dbo].[Users] WHERE username = @username");
+                    string _sql = (@"SELECT id FROM [dbo].[Users] WHERE username = @username");
                     var cmd = new SqlCommand(_sql, cn);
-                    cmd.Parameters.AddWithValue("@username", constants.UserName);
+                    cmd.Parameters.AddWithValue("@username", context.Session["Username"]);
+                    System.Diagnostics.Debug.WriteLine(context.Session["Username"]);
                     cn.Open();
                     var reader = cmd.ExecuteReader();
+                    
                     if (reader.HasRows)
                     {
                         cn.Close();
                         string _sqlInsert = @"INSERT INTO [dbo].[Profile] (userid, gender, sexpref, bio, tags) VALUES (@userid, @gender, @sexpref, @bio, @tags)";
                         cmd = new SqlCommand(_sqlInsert, cn);
-                        cmd.Parameters.AddWithValue("@userid", "11");
+                        cmd.Parameters.AddWithValue("@userid", context.Session["userid"]);
                         cmd.Parameters.AddWithValue("@gender", profile.Gender);
                         cmd.Parameters.AddWithValue("@sexpref", profile.SexPref);
                         cmd.Parameters.AddWithValue("@bio", profile.Bio);
                         cmd.Parameters.AddWithValue("@tags", stringTags);
                         cn.Open();
                         cmd.ExecuteReader();
-                        System.Diagnostics.Debug.WriteLine("ADDED");
+                        cn.Close();
+                        return true;
                     }
-                    cn.Close();
-
+                    else
+                    {
+                        cn.Close();
+                        return false;
+                    }
 
                 }
 
             }
+            else
+                return false;
 
         }
     }
