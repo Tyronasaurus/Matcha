@@ -1,0 +1,23 @@
+﻿@model Login2.Models.User
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Email Sent";
+    var user = ViewBag.Message;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title></title>
+</head>
+<body>
+    <div>
+        An email has been sent to @user.Username at @user.Email
+        <div>
+            @Html.ActionLink("Go To Login","Login", "User")
+        </div>
+    </div>
+</body>
+</html>

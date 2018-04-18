@@ -15,9 +15,7 @@ namespace Login2.Models
     {
         public Profile Profile { get; set; }
         public ProfileTagsList ProfileTagsList { get; set; }
-        
     }
-
 
     public class Profile
     {
@@ -31,7 +29,7 @@ namespace Login2.Models
         public string Bio { get; set; }
 
         [Display(Name = "Tags")]
-        public List<ProfileTags> Tags { get; set; }
+        public List<ProfileTags> Tags{ get; set; }
 
 
         public bool AddProfToDB(Profile profile)
@@ -47,7 +45,6 @@ namespace Login2.Models
             var isLogged = context.Session["LoggedIn"];
             if (isLogged != null)
             {
-
                 using (var cn = new SqlConnection(Constants.ConnString))
                 {
                     string _sql = (@"SELECT id FROM [dbo].[Users] WHERE username = @username");
@@ -62,7 +59,7 @@ namespace Login2.Models
                         cn.Close();
                         string _sqlInsert = @"INSERT INTO [dbo].[Profile] (userid, gender, sexpref, bio, tags) VALUES (@userid, @gender, @sexpref, @bio, @tags)";
                         cmd = new SqlCommand(_sqlInsert, cn);
-                        cmd.Parameters.AddWithValue("@userid", context.Session["userid"]);
+                        cmd.Parameters.AddWithValue("@userid", context.Session["id"]);
                         cmd.Parameters.AddWithValue("@gender", profile.Gender);
                         cmd.Parameters.AddWithValue("@sexpref", profile.SexPref);
                         cmd.Parameters.AddWithValue("@bio", profile.Bio);
@@ -70,6 +67,7 @@ namespace Login2.Models
                         cn.Open();
                         cmd.ExecuteReader();
                         cn.Close();
+                        System.Diagnostics.Debug.WriteLine("Added to DataBase");
                         return true;
                     }
                     else
@@ -77,13 +75,10 @@ namespace Login2.Models
                         cn.Close();
                         return false;
                     }
-
                 }
-
             }
             else
                 return false;
-
         }
     }
 

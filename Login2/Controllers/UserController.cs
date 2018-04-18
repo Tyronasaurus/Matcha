@@ -18,6 +18,14 @@ namespace Login2.Controllers
             return View();
         }
        
+        [HttpGet]
+        public ActionResult EmailSent()
+        {
+            User user = (User)TempData["user"];
+            ViewBag.Message = user;
+
+            return View();
+        }
 
         [HttpGet]
         public ActionResult Login ()
@@ -29,6 +37,12 @@ namespace Login2.Controllers
         public ActionResult Register()
         {
             return View();
+        }
+
+        [HttpPost]
+        public ActionResult EmailSent (User user)
+        {
+            return View(user);
         }
 
         [HttpPost]
@@ -61,7 +75,9 @@ namespace Login2.Controllers
                 if (user.Registration(user))
                 {
                     SendMail(user);
-                    System.Diagnostics.Debug.WriteLine("Send mailer");
+
+                    TempData["user"] = user;
+                    return RedirectToAction("EmailSent", "User");
                 }
                 else
                 {
@@ -74,7 +90,8 @@ namespace Login2.Controllers
         public ActionResult Logout ()
         {
             FormsAuthentication.SignOut();
-            Session.Clear();
+            if (Session != null)
+                Session.Clear();
             return RedirectToAction("Index", "Home");
         }
 

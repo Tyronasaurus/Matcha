@@ -34,6 +34,12 @@
                     </ul>
                     <div>
                         <strong>@Html.Encode(User.Identity.Name)</strong>
+
+                        @{ 
+                            Session["Username"] = User.Identity.Name;
+                            Session["LoggedIn"] = true;
+                        }
+
                         @Html.ActionLink("Sign Out", "Logout", "User")
                         @Html.Display("Signed in")
                             <form class="form-inline ml-2 my-lg-0">

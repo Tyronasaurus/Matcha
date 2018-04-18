@@ -52,6 +52,7 @@ namespace Login2.Controllers
 
             return View(BigModel);
         }
+
         [HttpPost]
         public ActionResult ProfileEditor(BigModel bigModel)
         {
@@ -71,6 +72,7 @@ namespace Login2.Controllers
                 }
                 profile.Tags = profileTags;
                 bool Added = profile.AddProfToDB(profile);
+                System.Diagnostics.Debug.WriteLine("Added to db: " + Added);
                 if (Added == true)
                 {
                     return RedirectToAction("ProfileView", "Profile");
@@ -92,31 +94,91 @@ namespace Login2.Controllers
             SqlConnection cn = null;
             SqlCommand cmd = null;
  
-            if (Session["id"] != null)
+
+            if (Session["id"] == null)
             {
-                try
+                if (Session["Username"] != null)
                 {
-                    cn = new SqlConnection(Constants.ConnString);
-                    string _sql = @"SELECT * FROM [dbo].[Profile] WHERE user = @userid";
-                    cmd = new SqlCommand(_sql, cn);
-                    cmd.Parameters.AddWithValue("@userid", Session["id"]);
-                    cn.Open();
-                    reader = cmd.ExecuteReader();
-
-
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine(ex);
-                }
-                finally
-                {
-                    if (reader != null)
-                        reader.Close();
-
-                    if (cn.State == ConnectionState.Open)
+                    try
+                    {
+                        cn = new SqlConnection(Constants.ConnString);
+                        cmd = new SqlCommand("SELECT id FROM [dbo].[Users] WHERE username = @user", cn);
+                        cmd.Parameters.AddWithValue("@user", Session["Username"]);
+                        cn.Open();
+                        reader = cmd.ExecuteReader();
+                        reader.Read();
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine(ex);
+                    }
+                    finally
+                    {
+                        Session["id"] = reader["id"];
                         cn.Close();
+                    }
                 }
+                else
+                {
+                    var UC = new UserController();
+                    UC.Logout();
+                }
+            }
+
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("Inside try");
+                cn = new SqlConnection(Constants.ConnString);
+                string _sql = @"SELECT * FROM [dbo].[Profile] WHERE userid = @userid";
+                cmd = new SqlCommand(_sql, cn);
+                cmd.Parameters.AddWithValue("@userid", Session["id"]);
+                cn.Open();
+                reader = cmd.ExecuteReader();
+                reader.Read();
+                if (reader.HasRows)
+                {
+                    var prof = new Profile();
+                    prof.Tags = new List<ProfileTags>();
+                    System.Diagnostics.Debug.WriteLine(reader["gender"]);
+                    if (reader["gender"] != null)
+                        prof.Gender = reader["gender"].ToString();
+                    if (reader["sexPref"] != null)
+                        prof.SexPref = reader["sexPref"].ToString();
+                    if (reader["bio"] != null)
+                        prof.Bio = reader["bio"].ToString(); 
+                    if (reader["tags"] != null)
+                    {
+                        var TagString = reader["tags"].ToString().Split(',');
+                        System.Diagnostics.Debug.WriteLine(TagString.Length.ToString());
+                        ProfileTags newtag = new ProfileTags();
+                        for (int i = 0; i < TagString.Length; i++)
+                        {
+                            newtag = new ProfileTags();
+
+                            newtag.TagName = TagString[i].ToString();
+                            
+                            prof.Tags.Add(newtag);
+                        }
+                    }
+                    ViewBag.Message = prof;
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine("Did not set Viewbag");
+                    return RedirectToAction("ProfileEditor", "Profile");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("ERROR " + ex);
+            }
+            finally
+            {
+                if (reader != null)
+                    reader.Close();
+
+                if (cn.State == ConnectionState.Open)
+                    cn.Close();
             }
             return View();
         }
@@ -124,6 +186,7 @@ namespace Login2.Controllers
         [HttpPost]
         public ActionResult ProfileView (Models.Profile profile)
         {
+
             return View(profile);
         }
     }

@@ -36,7 +36,7 @@ namespace Login2.Models
             try
             {
                 cn = new SqlConnection(Constants.ConnString);
-                string _sql = @"SELECT [username] FROM [dbo].[Users] WHERE [username] = @user AND [password] = @pass";
+                string _sql = @"SELECT * FROM [dbo].[Users] WHERE [username] = @user AND [password] = @pass";
                 cmd = new SqlCommand(_sql, cn);
                 cmd.Parameters.AddWithValue("@user", _username);
                 cmd.Parameters.AddWithValue("@pass", Helpers.SHA1.Encode(_password));
@@ -46,7 +46,7 @@ namespace Login2.Models
                 if (reader.HasRows)
                 {
                     reader.Read();
-                    context.Session["userid"] = reader["id"];
+                    context.Session["id"] = reader["id"];
                     return true;
                 }
                 else
