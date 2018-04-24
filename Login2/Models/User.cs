@@ -36,7 +36,7 @@ namespace Login2.Models
             try
             {
                 cn = new SqlConnection(Constants.ConnString);
-                string _sql = @"SELECT * FROM [dbo].[Users] WHERE [username] = @user AND [password] = @pass";
+                string _sql = @"SELECT * FROM Users WHERE [username] = @user AND [password] = @pass";
                 cmd = new SqlCommand(_sql, cn);
                 cmd.Parameters.AddWithValue("@user", _username);
                 cmd.Parameters.AddWithValue("@pass", Helpers.SHA1.Encode(_password));
@@ -46,7 +46,7 @@ namespace Login2.Models
                 if (reader.HasRows)
                 {
                     reader.Read();
-                    context.Session["id"] = reader["id"];
+                    context.Session["Username"] = reader["username"];
                     return true;
                 }
                 else
@@ -101,7 +101,7 @@ namespace Login2.Models
             user.Token = Guid.NewGuid().ToString();
             using (var cn = new SqlConnection(Constants.ConnString))
             {
-                string _sql = @"SELECT * FROM [dbo].[Users] WHERE username = @uname OR email = @email";
+                string _sql = @"SELECT * FROM Users WHERE username = @uname OR email = @email";
                 var cmd = new SqlCommand(_sql, cn);
                 cmd.Parameters
                     .Add(new SqlParameter("@uname", SqlDbType.VarChar))
@@ -114,7 +114,7 @@ namespace Login2.Models
                 var x = cmd.ExecuteScalar();
                 if (x == null)
                 {
-                    string _sqlinsert = @"INSERT INTO [dbo].[Users] (email, username, first_name, last_name, password, token) VALUES (@email, @user, @fname, @lname, @pass, @token)";
+                    string _sqlinsert = @"INSERT INTO Users (email, username, first_name, last_name, password, token) VALUES (@email, @user, @fname, @lname, @pass, @token)";
                     cmd = new SqlCommand(_sqlinsert, cn);
                     cmd.Parameters.AddWithValue("@email", user.Email);
                     cmd.Parameters.AddWithValue("@user", user.Username);

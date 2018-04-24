@@ -1,18 +1,56 @@
-﻿DROP TABLE [dbo].[Users]
+﻿USE master;
 
-CREATE TABLE [dbo].[Users]
-(
-	[id] INT NOT NULL PRIMARY KEY IDENTITY, 
-    [email] VARCHAR(MAX) NOT NULL, 
-    [username] VARCHAR(50) NOT NULL, 
-    [first_name] VARCHAR(MAX) NOT NULL, 
-    [last_name] VARCHAR(MAX) NOT NULL, 
-    [password] VARCHAR(MAX) NOT NULL
+IF EXISTS (SELECT name from sys.databases WHERE name = 'Accounts')
+	DROP DATABASE Accounts;
+
+CREATE DATABASE Accounts;
+USE Accounts;
+GO
+CREATE TABLE [dbo].[Users] (
+    [id]         INT           IDENTITY (1, 1) NOT NULL,
+    [email]      VARCHAR (MAX) NOT NULL,
+    [username]   VARCHAR (50)  NOT NULL,
+    [first_name] VARCHAR (MAX) NOT NULL,
+    [last_name]  VARCHAR (MAX) NOT NULL,
+    [password]   VARCHAR (MAX) NOT NULL,
+    [token]      VARCHAR (MAX) NULL,
+    PRIMARY KEY CLUSTERED ([username])
+);
+
+GO
+CREATE INDEX [IX_Users_username] ON Users ([username]);
+GO
+
+CREATE TABLE [dbo].[Profile] (
+    [id]      INT           IDENTITY (1, 1) NOT NULL,
+    [username]  VARCHAR(50)           NOT NULL,
+    [gender]  VARCHAR (50)  NOT NULL,
+    [sexPref] VARCHAR (50)  NOT NULL,
+    [bio]     VARCHAR (MAX) NULL,
+    [tags]    VARCHAR (MAX) NULL,
+    PRIMARY KEY CLUSTERED ([id] ASC),
+	FOREIGN KEY ([username]) REFERENCES [dbo].[Users] ([username])
+);
+
+GO
+CREATE TABLE Tags (
+    [id]      INT           IDENTITY (1,1) NOT NULL,
+    [TagName] VARCHAR (255) NOT NULL,
+    PRIMARY KEY CLUSTERED ([Id] ASC)
 );
 GO
-CREATE INDEX [IX_Users_username] ON [dbo].[Users] ([username]);
+INSERT INTO Tags (TagName)
+	VALUES ('Cosplay'),('Feet'),('BlueEyes'),('BrownEyes'),('GreenEyes'),
+	('Blonde'),('Brunette'),('Ginger'),('Bald'),('Piercings'),('Tattoos'),
+	('Sci-Fi'),('Sports'),('Books'),('Movies'),('Music');
+	
 GO
-INSERT INTO [dbo].[Users]
-	([email], [username], [first_name], [last_name], [password]) VALUES
-	('test@test.com', 'Tyron', 'Tyron', 'Admin' , 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3');
+CREATE TABLE [dbo].[Likes] (
+    [like_id]    INT IDENTITY (1, 1) NOT NULL,
+    [liked_user]    VARCHAR(50) NOT NULL,
+    [profile_liked] INT NOT NULL,
+    PRIMARY KEY CLUSTERED ([like_id] ASC),
+    FOREIGN KEY ([profile_liked]) REFERENCES [dbo].[Profile] ([id]),
+    FOREIGN KEY ([liked_user]) REFERENCES [dbo].[Users] ([username])
+);
 GO

@@ -42,10 +42,18 @@
 
                         @Html.ActionLink("Sign Out", "Logout", "User")
                         @Html.Display("Signed in")
-                            <form class="form-inline ml-2 my-lg-0">
-                            <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
-                            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-                        </form>
+
+                        <div>
+                            @using (Html.BeginForm("SearchProfile", "Search", FormMethod.Get))
+                            {
+                            <ul class="nav navbar-nav">
+                               <li>@Html.TextBox("SearchText")</li>
+
+                                <li><input type="submit" value="Search..." /></li>
+                            </ul>
+                            }
+                        </div>
+
                     </div>
                 </div>
             }

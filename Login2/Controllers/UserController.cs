@@ -110,8 +110,10 @@ namespace Login2.Controllers
                     mailMessage.Subject = " Testing Email";
                     mailMessage.BodyEncoding = System.Text.Encoding.UTF8;
                     mailMessage.SubjectEncoding = System.Text.Encoding.UTF8;
-                    SmtpClient smtpClient = new SmtpClient();
-                    smtpClient.Host = "localhost";
+                    SmtpClient smtpClient = new SmtpClient
+                    {
+                        Host = "localhost"
+                    };
                     smtpClient.Send(mailMessage);
                 }
             }
