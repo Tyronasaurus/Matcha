@@ -74,10 +74,24 @@ namespace Login2.Controllers
             {
                 if (user.Registration(user))
                 {
-                    SendMail(user);
+                    string subject = "Matcha Registration";
+
+                    System.Diagnostics.Debug.WriteLine(user.Token);
+                    string body = "Please follow this link to verify your account " +
+                        Request.Url.Authority + "?token=" + user.Token;
+
+                    var sendMail = new Models.SendMail.SendMail();
+                    bool sent = sendMail.SendEmail(user.Email, subject, body);
 
                     TempData["user"] = user;
-                    return RedirectToAction("EmailSent", "User");
+                    if (sent) {
+                        return RedirectToAction("EmailSent", "User");
+                    }
+                    else
+                    {
+                        return RedirectToAction("Index", "Home");
+                    }
+                    
                 }
                 else
                 {
