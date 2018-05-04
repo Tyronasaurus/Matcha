@@ -14,6 +14,7 @@ CREATE TABLE [dbo].[Users] (
     [last_name]  VARCHAR (MAX) NOT NULL,
     [password]   VARCHAR (MAX) NOT NULL,
     [token]      VARCHAR (MAX) NULL,
+	[online] BIT NULL, 
     PRIMARY KEY CLUSTERED ([username])
 );
 
@@ -28,6 +29,7 @@ CREATE TABLE [dbo].[Profile] (
     [sexPref] VARCHAR (50)  NOT NULL,
     [bio]     VARCHAR (MAX) NULL,
     [tags]    VARCHAR (MAX) NULL,
+	[location] VARCHAR(MAX) NULL,
     PRIMARY KEY CLUSTERED ([id] ASC),
 	FOREIGN KEY ([username]) REFERENCES [dbo].[Users] ([username])
 );

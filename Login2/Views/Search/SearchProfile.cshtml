@@ -3,63 +3,36 @@
     ViewBag.Title = "Profile Search";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var ProfList = ViewBag.Message;
-
+    var LikeCount = ViewBag.ListCount;
     <h2> Results for @Session["SearchText"] </h2>
 
     if (ViewBag.Message != null)
     {
 
-        //Wrap this in a while when viewbag returns list
         for (int i = 0; i < ProfList.Count; i++)
         {
-
             <div class="ProfileBlock">
 
-                <h1>@ProfList[i].Username</h1>
+                <h3>@ProfList[i].Username</h3>
                 <br />
-                <div>
-                    <h3>Biography</h3>
-                    <h5>@ProfList[i].Bio</h5>
-                </div>
-                <br />
-                <div>
-                    <h3>Gender</h3>
-                    <h5>@ProfList[i].Gender</h5>
-                </div>
-                <br />
-                <div>
-                    <h3>Looking for</h3>
-                    <h5>@ProfList[i].SexPref</h5>
-                </div>
-                <br />
-                <div>
-                    <h3>Tags</h3>
-                    @for (int k = 0; k < ProfList[i].Tags.Count; k++)
-                    {
-                        <h6>@ProfList[i].Tags[k].TagName</h6>
-                    }
-                </div>
-
-                @using (Html.BeginForm("GetLikeCount", "Like", FormMethod.Get))
+                @if (LikeCount[i] != null)
                 {
-
+                    <h4> Likes @LikeCount[i] </h4>
                 }
 
-                <div>
-                    @using (Html.BeginForm("LikeClicked", "Like", FormMethod.Post))
-                    {
-                        @Html.Hidden("HiddenName", (object)ProfList[i].Username)
-                        <input type="submit" value="Like" />
-                    }
-
-                </div>
             </div>
+            using (Html.BeginForm(
+                "SingleProfileView", "Profile", 
+                new { @Username = @ProfList[i].Username }, FormMethod.Post))
+            {
+                <input type="submit" value="View Profile" />
+            }
         }
-        // Wrap till here
+
     }
     else
     {
-            <h2> No results for @Session["SearchText"]</h2>
+        <h2> No results for @Session["SearchText"]</h2>
     }
 }
 

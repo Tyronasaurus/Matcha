@@ -1,0 +1,50 @@
+﻿@model Login2.Models.Profile
+@{
+    ViewBag.Title = "SingleProfileView";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var Prof = ViewBag.Profile;
+    var Likes = ViewBag.Likes;
+}
+
+<div class="ProfileBlock">
+
+    <h1>@Prof.Username</h1>
+    <br />
+    <div>
+        <h3>Biography</h3>
+        <h5>@Prof.Bio</h5>
+    </div>
+    <br />
+    <div>
+        <h3>Gender</h3>
+        <h5>@Prof.Gender</h5>
+    </div>
+    <br />
+    <div>
+        <h3>Looking for</h3>
+        <h5>@Prof.SexPref</h5>
+    </div>
+    <br />
+    <div>
+        <h3>Tags</h3>
+        @for (int k = 0; k < Prof.Tags.Count; k++)
+        {
+            <h6>@Prof.Tags[k].TagName</h6>
+        }
+    </div>
+
+    @if (Likes != null)
+    {
+        <h6> @Likes</h6>
+    }
+
+    <div>
+        @using (Html.BeginForm("LikeClicked", "Like",
+            new { @liked_Profile = Prof.Username}
+            , FormMethod.Post))
+        {
+            <input type="submit" value="Like" />
+        }
+
+    </div>
+</div>

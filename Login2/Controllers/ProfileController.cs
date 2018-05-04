@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Web.Mvc;
 using System.Data.SqlClient;
+
 using Login2.Models;
 
 namespace Login2.Controllers
 {
     public class ProfileController : Controller
     {
+        
         // GET: Profile
         [HttpGet]
         public ActionResult ProfileEditor()
@@ -203,6 +205,26 @@ namespace Login2.Controllers
         {
 
             return View(profile);
+        }
+
+        [HttpPost]
+        public ActionResult SingleProfileView(string Username)
+        {
+            string SingleUser = Username;
+
+            System.Diagnostics.Debug.WriteLine(SingleUser + " inside SPVC");
+
+            Profile SingleProf = new Profile();
+            int Likes = 0;
+            SearchController Searcher = new SearchController();
+
+
+
+            SingleProf = ReturnProfile(SingleUser);
+            Likes = Searcher.LikeCount(SingleUser);
+            ViewBag.Likes = Likes;
+            ViewBag.Profile = SingleProf;
+            return View(SingleProf);
         }
     }
 }

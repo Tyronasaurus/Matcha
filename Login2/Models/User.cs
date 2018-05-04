@@ -14,17 +14,12 @@ namespace Login2.Models
 
         //------LOGIN-----\\
 
-        [Required]
         [Display(Name = "User Name")]
         public string Username { get; set; }
 
-        [Required]
         [DataType(DataType.Password)]
         [Display(Name = "Password")]
         public string Password { get; set; }
-
-        [Display(Name = "Remember me on this computer")]
-        public bool RememberMe { get; set; }
 
         public bool IsValid(string _username, string _password)
         {
@@ -46,8 +41,16 @@ namespace Login2.Models
                 if (reader.HasRows)
                 {
                     reader.Read();
-                    context.Session["Username"] = reader["username"];
-                    return true;
+                    string token = reader["token"].ToString();
+                    if (token == "0")
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        HttpContext.Current.Session["Usertoken"] = token;
+                        return false;
+                    }
                 }
                 else
                 {
@@ -133,6 +136,43 @@ namespace Login2.Models
                 return true;
             }
         }
-        //------PROFILE STUFF------\\
+
+        public User getUserInfo(string username)
+        {
+            SqlConnection cn = null;
+            SqlCommand cmd = null;
+            SqlDataReader reader = null;
+            User user = new User();
+            try
+            {
+                cn = new SqlConnection(Constants.ConnString);
+                string _sql = @"SELECT * FROM Users WHERE username = @username";
+                cmd = new SqlCommand(_sql, cn);
+                cmd.Parameters.AddWithValue("@username", username);
+                cn.Open();
+                reader = cmd.ExecuteReader();
+                reader.Read();
+                user.Email = reader["email"].ToString();
+                user.Username = username;
+                user.FirstName = reader["first_name"].ToString();
+                user.LastName = reader["last_name"].ToString();
+                user.token = reader["token"].ToString();
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine(e.Message);
+            }
+            finally
+            {
+                cn.Close();
+                cmd.Dispose();
+                reader.Close();
+            }
+            if (user != null)
+            {
+                return (user);
+            }
+            else return null;
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Login2.Models;
+using Login2.Models.SendMail;
 using System;
 using System.Data.SqlClient;
 using System.Web.Mvc;
@@ -7,20 +8,27 @@ namespace Login2.Controllers
 {
     public class LikeController : Controller
     {
-        // GET: Like
-        public ActionResult LikeClicked(string ProfileName)
+        public ActionResult GetLikeCount ()
         {
+            
             return RedirectToAction("SearchProfile", "Search");
         }
 
-        [HttpPost]
-        public ActionResult LikeClicked ()
+        // GET: Like
+        public ActionResult LikeClicked()
         {
+            System.Diagnostics.Debug.WriteLine("Inside Like Get");
+            return RedirectToAction("SingleProfileView", "Profile");
+        }
+
+        [HttpPost]
+        public ActionResult LikeClicked (string liked_Profile)
+        {
+            System.Diagnostics.Debug.WriteLine("Inside Like Post");
             SqlDataReader reader = null;
             SqlConnection cn = null;
             SqlCommand cmd = null;
 
-            string liked_Profile = Request["HiddenName"];
             if (Session["Username"] == null)
             {
                 var UC = new UserController();
@@ -40,7 +48,7 @@ namespace Login2.Controllers
                 if (!reader.HasRows)
                 {
                     cn.Close();
-                    _sql = @"INSERT INTo Likes (liked_user, profile) VALUES (@liked_user, @profile)";
+                    _sql = @"INSERT INTO Likes (liked_user, profile) VALUES (@liked_user, @profile)";
                     cmd = new SqlCommand(_sql, cn);
                     cmd.Parameters.AddWithValue("@liked_user", liked_User);
                     cmd.Parameters.AddWithValue("@profile", liked_Profile);
@@ -52,8 +60,30 @@ namespace Login2.Controllers
             {
                 System.Diagnostics.Debug.WriteLine(e.Message);
             }
+            SendMailLike(liked_Profile, liked_User);
             System.Diagnostics.Debug.WriteLine(liked_User + " likes " + liked_Profile);
-            return RedirectToAction("SearchProfile", "Search");
+            return Redirect(Request.Url.Authority + "?Username=" + liked_Profile);
+        }
+
+
+        public void SendMailLike(string username, string liked_User)
+        {
+            User user = new User();
+            user = user.getUserInfo(username);
+            SendMail sendMail = new SendMail();
+
+            string subject = "A potential match is in the making";
+            string body = "Dear " + username + ", " + liked_User + 
+                " is interested and has liked your profile! Like them back to start chatting";
+
+            bool sent = sendMail.SendEmail(user.Email, subject, body);
+
+            if (sent)
+            {
+                System.Diagnostics.Debug.WriteLine("Like mail sent");
+            }
+
+
         }
     }
 }   

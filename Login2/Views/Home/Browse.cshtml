@@ -1,0 +1,49 @@
+﻿@model Login2.Models.Profile
+@{
+    ViewBag.Title = "Browse";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var ProfList = ViewBag.ProfileList;
+    <h2>Browse</h2>
+
+    if (ProfList == null)
+    {
+        <h2> @ViewBag.ErrorMessage </h2>
+    }
+    else
+    {
+        for (int i = 0; i < ProfList.Count; i++)
+        {
+
+            <div class="ProfileBlock">
+
+                <h1>@ProfList[i].Username</h1>
+                <br />
+                <div>
+                    <h3>Biography</h3>
+                    <h5>@ProfList[i].Bio</h5>
+                </div>
+                <br />
+                <div>
+                    <h3>Gender</h3>
+                    <h5>@ProfList[i].Gender</h5>
+                </div>
+                <br />
+                <div>
+                    <h3>Looking for</h3>
+                    <h5>@ProfList[i].SexPref</h5>
+                </div>
+                <br />
+                <div>
+                    <h3>Tags</h3>
+                    @for (int k = 0; k < ProfList[i].Tags.Count; k++)
+                    {
+                        <h6>@ProfList[i].Tags[k].TagName</h6>
+                    }
+                </div>
+            </div>
+        }
+    }
+}
+
+
+

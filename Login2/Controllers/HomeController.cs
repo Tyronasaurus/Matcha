@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+using Login2.Models;
+using System.Data.SqlClient;
 using System.Web.Mvc;
+using System.Web.Script.Serialization;
 
 namespace Login2.Controllers
 {
@@ -10,21 +11,136 @@ namespace Login2.Controllers
     {
         public ActionResult Index()
         {
+            if (Request.IsAuthenticated)
+            {
+
+                if (Session["Username"] == null)
+                {
+                    Session["Username"] = User.Identity.Name;
+                }
+                getLocation();
+                ConnectionStatus(true, Session["Username"].ToString());
+            }
             return View();
         }
 
-        public ActionResult About()
+        [HttpGet]
+        public ActionResult Browse()
         {
-            ViewBag.Message = "Your application description page.";
+            SqlDataReader reader = null;
+            SqlConnection cn = null;
+            SqlCommand cmd = null;
 
+            var ProfList = new List<Profile>();
+            ProfileController profcontroller = new ProfileController();
+
+            try
+            {
+                cn = new SqlConnection(Constants.ConnString);
+                string _sql = @"SELECT * FROM Profile WHERE username <> @username";
+                cmd = new SqlCommand(_sql, cn);
+                cmd.Parameters.AddWithValue("@username", Session["Username"]);
+                cn.Open();
+                reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    string username = reader["username"].ToString();
+                    ProfList.Add(profcontroller.ReturnProfile(username));
+                }
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine(e.Message);
+            }
+            if (ProfList == null)
+            {
+                ViewBag.ProfileList = ProfList;
+            }
+            else
+            {
+                ViewBag.ProfileList = null;
+                ViewBag.ErrorMEssage = "No users";
+            }
+            cn.Close();
             return View();
         }
 
-        public ActionResult Contact()
+        [HttpPost]
+        public ActionResult Browse(string Filter)
         {
-            ViewBag.Message = "Your contact page.";
+            return (View());
+        }
 
-            return View();
+        public void getLocation()
+        {
+            string location;
+            using (var webClient = new System.Net.WebClient())
+            {
+                var data = webClient.DownloadString("https://geoip-db.com/json");
+                JavaScriptSerializer jss = new JavaScriptSerializer();
+                var d = jss.Deserialize<dynamic>(data);
+
+                //string country_name = d["country_name"];
+                string city = d["city"];
+                string state = d["state"];
+                //string ipv4 = d["IPv4"];
+                location = city + ":" + state;
+            }
+            if (location != null)
+            {
+                updateLocation(location);
+            }
+        }
+
+        public void updateLocation(string location)
+        {
+            SqlConnection cn = null;
+            SqlCommand cmd = null;
+
+            string username = Session["Username"].ToString();
+            try
+            {
+                cn = new SqlConnection(Constants.ConnString);
+                string _sql = @"UPDATE Profile SET location = @location WHERE username = @username";
+                cmd = new SqlCommand(_sql, cn);
+                cmd.Parameters.AddWithValue("@location", location);
+                cmd.Parameters.AddWithValue("@username", username);
+                cn.Open();
+                cmd.ExecuteReader();
+                System.Diagnostics.Debug.WriteLine("Successfully updated user location for " + username);
+                cn.Close();
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine(e.Message);
+            }
+        }
+
+        public void ConnectionStatus(bool IO, string Username)
+        {
+            SqlConnection cn = null;
+            SqlCommand cmd = null;
+            string _sql = null;
+
+            if (IO == true)
+                _sql = @"UPDATE Users SET online = 1 WHERE username = @username";
+            else if (IO == false)
+                _sql = @"UPDATE Users SET online = 0 WHERE username = @username";
+
+            try
+            {
+                cn = new SqlConnection(Constants.ConnString);
+                cmd = new SqlCommand(_sql, cn);
+                cmd.Parameters.AddWithValue("@username", Username);
+                cn.Open();
+                cmd.ExecuteReader();
+                System.Diagnostics.Debug.WriteLine("Set online to " + IO);
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine(e.Message);
+            }
+            
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Data.SqlClient;
 using Login2.Models;
 using System.Web;
 using System.Collections.Generic;
+using System;
 
 namespace Login2.Controllers
 {
@@ -17,6 +18,7 @@ namespace Login2.Controllers
         public ActionResult SearchProfile(string SearchText)
         {
             var ProfList = new List<Profile>();
+            var LikeList = new List<int>();
             string[] usernames = GetUsers(SearchText);
             
 
@@ -25,6 +27,9 @@ namespace Login2.Controllers
                 for (int i = 0; i < usernames.Length; i++)
                 {
                     ProfList.Add(profcontroller.ReturnProfile(usernames[i]));
+                    int LikeCOunter = LikeCount(usernames[i]);
+                    System.Diagnostics.Debug.WriteLine(LikeCOunter);
+                    LikeList.Add(LikeCOunter);
                 }
                 ViewBag.Message = ProfList;
             }
@@ -32,10 +37,7 @@ namespace Login2.Controllers
             {
                 ViewBag.Message = null;
             }
-            
-            ViewBag.UsernameList = usernames;
-            if (Session["SearchText"] == null)
-                Session["SearchText"] = SearchText;
+            ViewBag.ListCount = LikeList ;
 
             return View();
         }
@@ -69,6 +71,37 @@ namespace Login2.Controllers
             {
                 return (null);
             }
+        }
+
+        public int LikeCount(string Username)
+        {
+            System.Diagnostics.Debug.WriteLine("Inside LikeCount");
+
+            SqlDataReader reader = null;
+            SqlConnection cn = null;
+            SqlCommand cmd = null;
+
+            int LikeCounter = 0;
+
+            try
+            {
+                cn = new SqlConnection(Constants.ConnString);
+                string _sql = @"SELECT COUNT(*) AS LikeCount FROM LIKES WHERE profile = @profile";
+                cmd = new SqlCommand(_sql, cn);
+                cmd.Parameters.AddWithValue("@profile", Username);
+
+                cn.Open();
+                reader = cmd.ExecuteReader();
+                reader.Read();
+                LikeCounter = (int)reader["LikeCount"];
+                
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine(e.Message);
+            }
+           
+            return (LikeCounter);
         }
     }
 }

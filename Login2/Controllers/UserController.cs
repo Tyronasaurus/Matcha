@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Data.SqlClient;
 using System.Net.Mail;
-using System.Web;
 using System.Web.Mvc;
 using System.Web.Security;
 using Login2.Models;
-
 
 namespace Login2.Controllers
 {
@@ -56,11 +53,35 @@ namespace Login2.Controllers
                     Session["LoggedIn"] = true;
                     Session["Username"] = user.Username;
                     Session["Token"] = user.Token;
+
                     FormsAuthentication.SetAuthCookie(user.Username, true);
                     return RedirectToAction("Index", "Home");
                 }
                 else
                 {
+                    if (Session["Usertoken"] != null)
+                    {
+                        user = user.getUserInfo(user.Username);
+
+                        string body = "Please follow this link to verify your account http://" +
+                                        Request.Url.Authority + "/User/VerifyAccount?token=" + 
+                                        user.Token + "&username=" + user.Username;
+                        string subject = "Matcha Registration";
+
+                        var sendMail = new Models.SendMail.SendMail();
+                        bool sent = sendMail.SendEmail(user.Email, subject, body);
+
+                        if (sent)
+                        {
+                            TempData["user"] = user;
+                            return RedirectToAction("EmailSent", "User");
+                        }
+                        else
+                        {
+                            return RedirectToAction("Index", "Home");
+                        }
+
+                    }
                     ModelState.AddModelError("", "Failed to login. Please try again");
                 }
             }
@@ -77,14 +98,15 @@ namespace Login2.Controllers
                     string subject = "Matcha Registration";
 
                     System.Diagnostics.Debug.WriteLine(user.Token);
-                    string body = "Please follow this link to verify your account " +
-                        Request.Url.Authority + "?token=" + user.Token;
+                    string body = "Please follow this link to verify your account http://" +
+                        Request.Url.Authority + "/User/VerifyAccount?token=" + user.Token + 
+                        "&username=" + user.Username;
 
                     var sendMail = new Models.SendMail.SendMail();
                     bool sent = sendMail.SendEmail(user.Email, subject, body);
 
-                    TempData["user"] = user;
                     if (sent) {
+                        TempData["user"] = user;
                         return RedirectToAction("EmailSent", "User");
                     }
                     else
@@ -103,38 +125,39 @@ namespace Login2.Controllers
 
         public ActionResult Logout ()
         {
+            HomeController HC = new HomeController();
+            HC.ConnectionStatus(false, Session["Username"].ToString());
             FormsAuthentication.SignOut();
             if (Session != null)
                 Session.Clear();
             return RedirectToAction("Index", "Home");
         }
 
-        public void SendMail(Models.User user)
+
+        public ActionResult VerifyAccount (string token, string username)
         {
+            SqlConnection cn = null;
+            SqlCommand cmd = null;
 
             try
             {
-                using (MailMessage mailMessage = new MailMessage())
-                {
-                    MailAddress fromAddress = new MailAddress("tbkearsley@gmail.com", "Matcha Registration");
-                    mailMessage.From = fromAddress;
-                    mailMessage.To.Add(user.Email);
-                    mailMessage.Body = "This is Testing Email Without Configured SMTP Server";
-                    mailMessage.IsBodyHtml = true;
-                    mailMessage.Subject = " Testing Email";
-                    mailMessage.BodyEncoding = System.Text.Encoding.UTF8;
-                    mailMessage.SubjectEncoding = System.Text.Encoding.UTF8;
-                    SmtpClient smtpClient = new SmtpClient
-                    {
-                        Host = "localhost"
-                    };
-                    smtpClient.Send(mailMessage);
-                }
+                cn = new SqlConnection(Constants.ConnString);
+                string _sql = @"UPDATE Users SET token = 0 WHERE username = @username AND token = @token";
+                cmd = new SqlCommand(_sql, cn);
+                cmd.Parameters.AddWithValue("@username", username);
+                cmd.Parameters.AddWithValue("@token", token);
+                cn.Open();
+                cmd.ExecuteReader();
+                cn.Close();
+                System.Diagnostics.Debug.WriteLine("Validated account for " + username);
+                return View();
             }
             catch (Exception e)
             {
                 System.Diagnostics.Debug.WriteLine(e.Message);
+                return View();
             }
+
         }
     }
 }
