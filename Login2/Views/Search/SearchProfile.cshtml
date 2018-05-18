@@ -22,8 +22,8 @@
 
             </div>
             using (Html.BeginForm(
-                "SingleProfileView", "Profile", 
-                new { @Username = @ProfList[i].Username }, FormMethod.Post))
+                "SingleProfileView", "Profile",
+                new { Username = @ProfList[i].Username }, FormMethod.Post ))
             {
                 <input type="submit" value="View Profile" />
             }

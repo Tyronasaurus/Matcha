@@ -16,34 +16,23 @@
 
             <div class="ProfileBlock">
 
-                <h1>@ProfList[i].Username</h1>
+                <h2>@ProfList[i].Username</h2>
                 <br />
                 <div>
-                    <h3>Biography</h3>
-                    <h5>@ProfList[i].Bio</h5>
+                    <h3>Fame: @ProfList[i].Fame</h3>
+
                 </div>
-                <br />
-                <div>
-                    <h3>Gender</h3>
-                    <h5>@ProfList[i].Gender</h5>
-                </div>
-                <br />
-                <div>
-                    <h3>Looking for</h3>
-                    <h5>@ProfList[i].SexPref</h5>
-                </div>
-                <br />
-                <div>
-                    <h3>Tags</h3>
-                    @for (int k = 0; k < ProfList[i].Tags.Count; k++)
-                    {
-                        <h6>@ProfList[i].Tags[k].TagName</h6>
-                    }
-                </div>
+                @using (Html.BeginForm(
+                "SingleProfileView", "Profile",
+                new { Username = @ProfList[i].Username }, FormMethod.Post))
+                {
+                    <input type="submit" value="View Profile" />
+                }
             </div>
         }
     }
 }
+
 
 
 

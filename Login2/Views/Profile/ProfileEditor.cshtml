@@ -2,57 +2,123 @@
 @{
     ViewBag.Title = "ProfileEditor";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var Current = ViewBag.Current;
 }
 
-@using (Html.BeginForm("ProfileEditor", "Profile"))
+@using (Html.BeginForm("ProfileEditor", "Profile", new { bigModel = Model }, FormMethod.Post))
 {
     @Html.ValidationSummary(true, "Edit failed. Check your login details");
     <div>
         <h2>Profile Editor</h2>
-        Welcome @Html.Encode(User.Identity.Name) the Profile Editor
+        Welcome @Html.Encode(User.Identity.Name) to the Profile Editor
     </div>
-    <div class="editor-label">
-        @Html.LabelFor(p => p.Profile.Gender)
+    <div class="FirstName">
+        <div class="editor-label">
+            @Html.LabelFor(p => p.Profile.FirstName)
+        </div>
+        <div class="editor-field">
+            @Html.TextBoxFor(p => p.Profile.FirstName, new { Value = Current.FirstName })
+            @Html.ValidationMessageFor(p => p.Profile.FirstName)
+        </div>
     </div>
-    <div name="editor-field">
-        @Html.DropDownListFor(p => p.Profile.Gender, new SelectList(new[] { "Male", "Female", "Other" }), "--Select--")
-        @Html.HiddenFor(p => p.Profile.Gender)
+    <div class="LastName">
+        <div class="editor-label">
+            @Html.LabelFor(p => p.Profile.LastName)
+        </div>
+        <div class="editor-field">
+            @Html.TextBoxFor(p => p.Profile.LastName, new { Value = Current.LastName })
+            @Html.ValidationMessageFor(p => p.Profile.LastName)
+        </div>
+    </div>
+        <div class="Age">
+        <div class="editor-label">
+            @Html.LabelFor(p => p.Profile.Age)
+        </div>
+        <div class="editor-field">
+            @Html.TextBoxFor(p => p.Profile.Age, new { Value = Current.Age })
+            @Html.ValidationMessageFor(p => p.Profile.Age)
+        </div>
+    </div>
+    <div class="Gender">
+        <div class="editor-label">
+            @Html.LabelFor(p => p.Profile.Gender)
+        </div>
+        <div name="editor-field">
+            @Html.DropDownListFor(p => p.Profile.Gender, new SelectList(new[] { "Male", "Female", "Other" }, Current.Gender), "--Select--")
+            @Html.HiddenFor(p => p.Profile.Gender)
+        </div>
     </div>
 
-    <div class="editor-label">
-        @Html.LabelFor(p => p.Profile.SexPref)
-    </div>
-    <div name="editor-field">
-        @Html.DropDownListFor(p => p.Profile.SexPref, new SelectList(new[] { "Male", "Female", "Other" }), "--Select--")
-    </div>
-
-    <div class="editor-label">
-        @Html.LabelFor(p => p.Profile.Bio)
-    </div>
-    <div class="editor-field">
-        @Html.TextAreaFor(p => p.Profile.Bio, new { placeholder = "Tell us about yourself" })
-    </div>
-    <div class="editor-label">
-        @Html.LabelFor(p => p.Profile.Tags)
+    <div class="SexPref">
+        <div class="editor-label">
+            @Html.LabelFor(p => p.Profile.SexPref)
+        </div>
+        <div name="editor-field">
+            @Html.DropDownListFor(p => p.Profile.SexPref, new SelectList(new[] { "Male", "Female", "Other" }, Current.SexPref), "--Select--")
+        </div>
     </div>
 
-    <table>
-    @for (int i = 0; i < Model.ProfileTagsList.DBTags.Count; i++)
-    {
-        <tr>
-            <td>
-                @Html.CheckBoxFor(x => x.ProfileTagsList.DBTags[i].IsSelected)
-            </td>
-            <td>
-                @Html.HiddenFor(x => x.ProfileTagsList.DBTags[i].TagName)
-                @Model.ProfileTagsList.DBTags[i].TagName
-            </td>
-        </tr>
-    }
+    <div class="Bio">
+        <div class="editor-label">
+            @Html.LabelFor(p => p.Profile.Bio)
+        </div>
+        <div class="editor-field">
+            @Html.TextAreaFor(p => p.Profile.Bio, new { Value = Current.Bio })
+        </div>
+    </div>
 
-    </table>
+    <div class="Location">
+        <div class="editor-label">
+            @Html.LabelFor(p => p.Profile.Location)
+        </div>
+        <div class="editor-field">
+            @Html.TextBoxFor(p => p.Profile.Location, new { Value = Current.Location} )
+        </div>
+        <p>Turn off location settings? </p>
+    </div>
 
+    <div class="Tags">
+        <div class="editor-label">
+            @Html.LabelFor(p => p.Profile.Tags)
+        </div>
+
+        <table>
+            @for (int i = 0; i < Model.ProfileTagsList.DBTags.Count; i++)
+            {
+
+                for (int j = 0; j < Current.Tags.Count; j++)
+                {
+                    if (Model.ProfileTagsList.DBTags[i].TagName == Current.Tags[j].TagName)
+                    {
+                        <tr>
+                            <td>
+                                @Html.CheckBoxFor(x => x.ProfileTagsList.DBTags[i].IsSelected, new { @checked = "checked" } )
+                            </td>
+                            <td>
+                                @Html.HiddenFor(x => x.ProfileTagsList.DBTags[i].TagName)
+                                @Model.ProfileTagsList.DBTags[i].TagName
+                            </td>
+                        </tr>
+                    }
+                    @*else
+                    {
+                        <tr>
+                            <td>
+                                @Html.CheckBoxFor(x => x.ProfileTagsList.DBTags[i].IsSelected)
+                            </td>
+                            <td>
+                                @Html.HiddenFor(x => x.ProfileTagsList.DBTags[i].TagName)
+                                @Model.ProfileTagsList.DBTags[i].TagName
+                            </td>
+                        </tr>
+                    }*@
+                }
+
+            }
+
+        </table>
+    </div>
     <div>
-        <input type="submit" value="Continue" />
+        <input type="submit" value="Save" />
     </div>
 }

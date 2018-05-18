@@ -3,16 +3,24 @@
     ViewBag.Title = "SingleProfileView";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var Prof = ViewBag.Profile;
-    var Likes = ViewBag.Likes;
+    var Likes = ViewBag.LikeCount;
 }
 
 <div class="ProfileBlock">
 
     <h1>@Prof.Username</h1>
     <br />
+    <h2>Fame: @Prof.Fame</h2>
+    <br />
+    <h2>@Prof.FirstName  @Prof.LastName</h2>
     <div>
         <h3>Biography</h3>
         <h5>@Prof.Bio</h5>
+    </div>
+    <br />
+    <div>
+        <h3>Age</h3>
+        <h5>@Prof.Age</h5>
     </div>
     <br />
     <div>
@@ -33,18 +41,15 @@
         }
     </div>
 
-    @if (Likes != null)
+    <h6> @Likes</h6>
+
+    @using (Html.BeginForm("LikeClicked", "Like", new { liked_Profile = Prof.Username }, FormMethod.Post))
     {
-        <h6> @Likes</h6>
+        <div>
+           <h5> @ViewBag.LikeCount </h5> 
+            <input type="submit" value=@ViewBag.LikeStat />
+
+        </div>
     }
 
-    <div>
-        @using (Html.BeginForm("LikeClicked", "Like",
-            new { @liked_Profile = Prof.Username}
-            , FormMethod.Post))
-        {
-            <input type="submit" value="Like" />
-        }
-
-    </div>
 </div>

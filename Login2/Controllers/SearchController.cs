@@ -15,21 +15,25 @@ namespace Login2.Controllers
         // GET: Search
 
         //Make viewbag return a list of profiles.
+
+        [HttpGet]
         public ActionResult SearchProfile(string SearchText)
-        {
+        { 
+            Session["SearchText"] = SearchText;
             var ProfList = new List<Profile>();
             var LikeList = new List<int>();
             string[] usernames = GetUsers(SearchText);
-            
+
+            Like likeModel = new Like();
 
             if (usernames != null)
             {
                 for (int i = 0; i < usernames.Length; i++)
                 {
                     ProfList.Add(profcontroller.ReturnProfile(usernames[i]));
-                    int LikeCOunter = LikeCount(usernames[i]);
-                    System.Diagnostics.Debug.WriteLine(LikeCOunter);
-                    LikeList.Add(LikeCOunter);
+                    int LikeCounter = likeModel.LikeCount(usernames[i]);
+                    System.Diagnostics.Debug.WriteLine(String.Format("# of likes for {0}: {1}", usernames[i], LikeCounter));
+                    LikeList.Add(LikeCounter);
                 }
                 ViewBag.Message = ProfList;
             }
@@ -37,7 +41,7 @@ namespace Login2.Controllers
             {
                 ViewBag.Message = null;
             }
-            ViewBag.ListCount = LikeList ;
+            ViewBag.ListCount = LikeList;
 
             return View();
         }
@@ -71,37 +75,6 @@ namespace Login2.Controllers
             {
                 return (null);
             }
-        }
-
-        public int LikeCount(string Username)
-        {
-            System.Diagnostics.Debug.WriteLine("Inside LikeCount");
-
-            SqlDataReader reader = null;
-            SqlConnection cn = null;
-            SqlCommand cmd = null;
-
-            int LikeCounter = 0;
-
-            try
-            {
-                cn = new SqlConnection(Constants.ConnString);
-                string _sql = @"SELECT COUNT(*) AS LikeCount FROM LIKES WHERE profile = @profile";
-                cmd = new SqlCommand(_sql, cn);
-                cmd.Parameters.AddWithValue("@profile", Username);
-
-                cn.Open();
-                reader = cmd.ExecuteReader();
-                reader.Read();
-                LikeCounter = (int)reader["LikeCount"];
-                
-            }
-            catch (Exception e)
-            {
-                System.Diagnostics.Debug.WriteLine(e.Message);
-            }
-           
-            return (LikeCounter);
         }
     }
 }

@@ -24,9 +24,14 @@
                 @Html.PasswordFor(u => u.Password)
                 @Html.ValidationMessageFor(u => u.Password)
             </div>
-            <div class="editor-label">
-                @Html.CheckBoxFor(u => u.RememberMe)
-                @Html.LabelFor(u => u.RememberMe)
+
+            <div>
+                <span>
+                    Not a member?
+                </span>
+                <a>
+                    @Html.ActionLink("Sign up now", "Register", "User")
+                </a>
             </div>
             <input type="submit" value="Log In" />
         </fieldset>

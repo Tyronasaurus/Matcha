@@ -14,7 +14,9 @@ namespace Login2.Controllers
         [HttpGet]
         public ActionResult ProfileEditor()
         {
-
+            var userProf = new Profile();
+            userProf = ReturnProfile(Session["Username"].ToString());
+            ViewBag.Current = userProf;
             //------TAGS-----\\
 
             List<ProfileTags> list = new List<ProfileTags>();
@@ -89,45 +91,10 @@ namespace Login2.Controllers
         [HttpGet]
         public ActionResult ProfileView ()
         {
-            //SqlDataReader reader = null;
-            //SqlConnection cn = null;
-            //SqlCommand cmd = null;
-            //var UC = new UserController();
-
-
-            //if (Session["id"] == null)
-            //{
-            //    if (Session["Username"] != null)
-            //    {
-            //        try
-            //        {
-            //            cn = new SqlConnection(Constants.ConnString);
-            //            cmd = new SqlCommand("SELECT id FROM Users WHERE username = @user", cn);
-            //            cmd.Parameters.AddWithValue("@user", Session["Username"]);
-            //            cn.Open();
-            //            reader = cmd.ExecuteReader();
-            //            reader.Read();
-            //        }
-            //        catch (Exception ex)
-            //        {
-            //            System.Diagnostics.Debug.WriteLine(ex);
-            //        }
-            //        finally
-            //        {
-            //            Session["id"] = reader["id"];
-            //            cn.Close();
-            //        }
-            //    }
-            //    else
-            //    {
-            //        UC.Logout();
-            //    }
-            //}
-
             try
             {
                 System.Diagnostics.Debug.WriteLine(string.Format("Inside try for {0}", Session["username"]));
-                Profile prof = ReturnProfile((string)Session["Username"]);
+                Profile prof = ReturnProfile(Session["Username"].ToString());
 
                 if (prof != null)
                 {
@@ -166,9 +133,19 @@ namespace Login2.Controllers
                 {
                     Tags = new List<ProfileTags>()
                 };
-                System.Diagnostics.Debug.WriteLine(reader["gender"]);
+
                 if (reader["username"] != null)
-                    prof.Username = reader["username"].ToString(); ;
+                    prof.Username = reader["username"].ToString();
+                if (reader["first_name"] != null)
+                    prof.FirstName = reader["first_name"].ToString();
+                if (reader["last_name"] != null)
+                    prof.LastName = reader["last_name"].ToString();
+                if (reader["age"] != null)
+                    prof.Age = (int)reader["age"];
+
+                prof.Fame = prof.CalcFame(prof.Username);
+                System.Diagnostics.Debug.WriteLine("Fame set inside ReturnProfile: " + prof.Fame);
+
                 if (reader["gender"] != null)
                     prof.Gender = reader["gender"].ToString();
                 if (reader["sexPref"] != null)
@@ -190,7 +167,16 @@ namespace Login2.Controllers
                         prof.Tags.Add(newtag);
                     }
                 }
+                if (reader["location"] != null)
+                {
+                    prof.Location = reader["location"].ToString();
+                }
+                if (reader["last_online"] != null)
+                {
+                    prof.LastOnline = reader["last_online"].ToString();
+                }
                 cn.Close();
+                System.Diagnostics.Debug.WriteLine("Profile Returned");
                 return (prof);
             }
             else
@@ -207,24 +193,36 @@ namespace Login2.Controllers
             return View(profile);
         }
 
-        [HttpPost]
         public ActionResult SingleProfileView(string Username)
         {
+            System.Diagnostics.Debug.WriteLine(Username + " inside SPVC");
             string SingleUser = Username;
-
-            System.Diagnostics.Debug.WriteLine(SingleUser + " inside SPVC");
 
             Profile SingleProf = new Profile();
             int Likes = 0;
-            SearchController Searcher = new SearchController();
-
-
+            Like likeModel = new Like();
+            bool LikeStat;
 
             SingleProf = ReturnProfile(SingleUser);
-            Likes = Searcher.LikeCount(SingleUser);
+            Likes = likeModel.LikeCount(SingleUser);
             ViewBag.Likes = Likes;
             ViewBag.Profile = SingleProf;
-            return View(SingleProf);
+            LikeStat = likeModel.LikeUnlike(Username, Session["Username"].ToString());
+            if (LikeStat == true)
+            {
+                ViewBag.LikeStat = "Like";
+            }
+            else
+            {
+                ViewBag.LikeStat = "Unlike";
+            }
+            return View();
         }
+
+        //[HttpPost]
+        //public ActionResult SingleProfileView(string likedProf, string likedUser)
+        //{
+        //    return RedirectToAction("LikeClicked", "Like", new { @liked_Profile = ViewBag.likedProf });
+        //}
     }
 }

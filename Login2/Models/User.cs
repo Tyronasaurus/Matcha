@@ -79,13 +79,6 @@ namespace Login2.Models
         [Display(Name = "Email Address")]
         public string Email { get; set; }
 
-        [Display(Name = "First Name")]
-        public string FirstName { get; set; }
-
-        [Display(Name = "Last Name")]
-        public string LastName { get; set; }
-
-
         private string token;
         public string Token
         {
@@ -117,12 +110,10 @@ namespace Login2.Models
                 var x = cmd.ExecuteScalar();
                 if (x == null)
                 {
-                    string _sqlinsert = @"INSERT INTO Users (email, username, first_name, last_name, password, token) VALUES (@email, @user, @fname, @lname, @pass, @token)";
+                    string _sqlinsert = @"INSERT INTO Users (email, username, password, token) VALUES (@email, @user, @pass, @token)";
                     cmd = new SqlCommand(_sqlinsert, cn);
                     cmd.Parameters.AddWithValue("@email", user.Email);
                     cmd.Parameters.AddWithValue("@user", user.Username);
-                    cmd.Parameters.AddWithValue("@fname", user.FirstName);
-                    cmd.Parameters.AddWithValue("@lname", user.LastName);
                     cmd.Parameters.AddWithValue("@pass", Helpers.SHA1.Encode(user.Password));
                     cmd.Parameters.AddWithValue("@token", user.Token);
                     //cn.Open();
@@ -154,8 +145,6 @@ namespace Login2.Models
                 reader.Read();
                 user.Email = reader["email"].ToString();
                 user.Username = username;
-                user.FirstName = reader["first_name"].ToString();
-                user.LastName = reader["last_name"].ToString();
                 user.token = reader["token"].ToString();
             }
             catch (Exception e)

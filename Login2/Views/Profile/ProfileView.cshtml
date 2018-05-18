@@ -10,11 +10,19 @@
 
 }
 
-<h1>Profile</h1>
+<h1>@profile.Username</h1>
+
+<h2>@profile.FirstName @profile.LastName</h2>
+
+<h3>@profile.Fame</h3>
 
 <div>
     <h2>Biography</h2>
     @profile.Bio
+</div>
+<div>
+    <h2>Age</h2>
+    @profile.Age
 </div>
 <div>
     <h2>Gender</h2>
@@ -33,5 +41,10 @@
         </div>
     }
 </div>
-@Html.ActionLink("Edit", "ProfileEditor", "Profile")
+
+<div>
+    <h2>Your Location</h2>
+    @profile.Location
+</div>
+    @Html.ActionLink("Edit", "ProfileEditor", "Profile")
 

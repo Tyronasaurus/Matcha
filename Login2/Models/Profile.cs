@@ -14,8 +14,25 @@ namespace Login2.Models
 
     public class Profile
     {
+        SqlDataReader reader = null;
+        SqlConnection cn = null;
+        SqlCommand cmd = null;
+        HttpContext context = HttpContext.Current;
+
         [Display(Name = "User Name")]
         public string Username { get; set; }
+
+        [Display(Name = "First Name")]
+        public string FirstName { get; set; }
+
+        [Display(Name = "Last Name")]
+        public string LastName { get; set; }
+
+        [Display(Name = "Age")]
+        public int Age { get; set; }
+
+        [Display(Name = "Fame")] 
+        public int Fame { get; set; }
 
         [Display(Name = "Gender")]
         public string Gender { get; set; }
@@ -29,13 +46,18 @@ namespace Login2.Models
         [Display(Name = "Tags")]
         public List<ProfileTags> Tags{ get; set; }
 
+        [Display(Name = "Location")]
+        public string Location { get; set; }
+
+        [Display(Name = "Online")]
+        public bool Online { get; set; }
+
+        [Display(Name = "Last Online")]
+        public string LastOnline { get; set; }
 
         public bool AddProfToDB(Profile profile)
         {
-            SqlDataReader reader = null;
-            SqlConnection cn = null;
-            SqlCommand cmd = null;
-            HttpContext context = HttpContext.Current;
+          
             var constants = new Constants();
 
             string stringTags = profile.Tags[0].TagName;
@@ -58,18 +80,23 @@ namespace Login2.Models
                     System.Diagnostics.Debug.WriteLine(context.Session["Username"]);
                     cn.Open();
                     reader = cmd.ExecuteReader();
-
+                    Username = context.Session["Username"].ToString();
                     if (reader.HasRows)
                     {
+                        reader.Close();
                         cn.Close();
                         System.Diagnostics.Debug.WriteLine("Username in users");
                         string sql = AddUpdateProfDB(profile);
                         cmd = new SqlCommand(sql, cn);
-                        cmd.Parameters.AddWithValue("@username", context.Session["Username"]);
+                        cmd.Parameters.AddWithValue("@username", Username);
+                        cmd.Parameters.AddWithValue("@fname", profile.FirstName);
+                        cmd.Parameters.AddWithValue("@lname", profile.LastName);
+                        cmd.Parameters.AddWithValue("@age", (int)profile.Age);
                         cmd.Parameters.AddWithValue("@gender", profile.Gender);
                         cmd.Parameters.AddWithValue("@sexpref", profile.SexPref);
                         cmd.Parameters.AddWithValue("@bio", profile.Bio);
                         cmd.Parameters.AddWithValue("@tags", stringTags);
+                        cmd.Parameters.AddWithValue("@location", profile.Location);
                         cn.Open();
                         cmd.ExecuteReader();
                         cn.Close();
@@ -85,7 +112,7 @@ namespace Login2.Models
                 }
                 catch (Exception e)
                 {
-                    System.Diagnostics.Debug.WriteLine(e.Message);
+                    System.Diagnostics.Debug.WriteLine("AddProfToDB: " + e.Message);
                     cn.Close();
                     return false;
                 }
@@ -110,14 +137,17 @@ namespace Login2.Models
                 {
                     cn.Close();
                     System.Diagnostics.Debug.WriteLine("Updating Profile DB");
-                    return (@"UPDATE Profile SET gender = @gender, sexPref = @sexPref, bio = @bio, tags = @tags " +
-                        @"WHERE username = @username");
+                    return (@"UPDATE Profile SET first_name = @fname, last_name = @lname, " +
+                            "age = @age, gender = @gender, sexPref = @sexPref, bio = @bio, " +
+                            "tags = @tags, location = @location WHERE username = @username");
                 }
                 else
                 {
                     cn.Close();
                     System.Diagnostics.Debug.WriteLine("Inserting Profile DB");
-                    return (@"INSERT INTO Profile (username, gender, sexpref, bio, tags) VALUES (@username, @gender, @sexpref, @bio, @tags)");
+                    return (@"INSERT INTO Profile " +
+                            "(username, first_name, last_name, age, gender, sexpref, bio, tags, location) " +
+                            "VALUES (@username, @lname, @age, @fame, @gender, @sexpref, @bio, @tags, @location)");
                 }
 
             }
@@ -126,6 +156,32 @@ namespace Login2.Models
                 System.Diagnostics.Debug.WriteLine(e.Message);
                 return null;
             }
+        }
+
+        public int GetProfileCount()
+        {
+            int ProfCount = 0;
+            cn = new SqlConnection(Constants.ConnString);
+            string _sql = @"SELECT COUNT(*) AS ProfCount FROM Profile";
+            cmd = new SqlCommand(_sql, cn);
+            cn.Open();
+            reader = cmd.ExecuteReader();
+            reader.Read();
+            ProfCount = (int)reader["ProfCount"];
+            cn.Close();
+            return ProfCount;
+
+        }
+
+        public int CalcFame(string Username)
+        {
+            Like likeModel = new Like();
+            int Likes = likeModel.LikeCount(Username);
+            int ProfCount = GetProfileCount();
+            decimal res = ((decimal)Likes / ProfCount) * 100;
+            Fame = (int)res;
+            System.Diagnostics.Debug.WriteLine(Likes + " / " + ProfCount + " * 100 = " + res);
+            return Fame;
         }
     }
 

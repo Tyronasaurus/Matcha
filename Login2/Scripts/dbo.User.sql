@@ -10,11 +10,8 @@ CREATE TABLE [dbo].[Users] (
     [id]         INT           IDENTITY (1, 1) NOT NULL,
     [email]      VARCHAR (MAX) NOT NULL,
     [username]   VARCHAR (50)  NOT NULL,
-    [first_name] VARCHAR (MAX) NOT NULL,
-    [last_name]  VARCHAR (MAX) NOT NULL,
     [password]   VARCHAR (MAX) NOT NULL,
-    [token]      VARCHAR (MAX) NULL,
-	[online] BIT NULL, 
+    [token]      VARCHAR (MAX) NULL
     PRIMARY KEY CLUSTERED ([username])
 );
 
@@ -23,13 +20,18 @@ CREATE INDEX [IX_Users_username] ON Users ([username]);
 GO
 
 CREATE TABLE [dbo].[Profile] (
-    [id]      INT           IDENTITY (1, 1) NOT NULL,
-    [username]  VARCHAR(50)           NOT NULL,
-    [gender]  VARCHAR (50)  NOT NULL,
-    [sexPref] VARCHAR (50)  NOT NULL,
-    [bio]     VARCHAR (MAX) NULL,
-    [tags]    VARCHAR (MAX) NULL,
-	[location] VARCHAR(MAX) NULL,
+    [id]			INT           IDENTITY (1, 1) NOT NULL,
+    [username]		VARCHAR (50)  NOT NULL,
+	[first_name]	VARCHAR (MAX) NOT NULL,
+    [last_name]		VARCHAR (MAX) NOT NULL,
+	[age]			INT,
+	[fame]			INT			  DEFAULT 0,
+    [gender]		VARCHAR (50)  NOT NULL,
+    [sexPref]		VARCHAR (50)  NOT NULL,
+    [bio]			VARCHAR (MAX) NULL,
+    [tags]			VARCHAR (MAX) NULL,
+	[location]		VARCHAR (MAX) NULL,
+	[online]		BIT			  DEFAULT 0, 
     PRIMARY KEY CLUSTERED ([id] ASC),
 	FOREIGN KEY ([username]) REFERENCES [dbo].[Users] ([username])
 );
@@ -48,9 +50,9 @@ INSERT INTO Tags (TagName)
 	
 GO
 CREATE TABLE [dbo].[Likes] (
-    [like_id]    INT IDENTITY (1, 1) NOT NULL,
-    [liked_user]    VARCHAR(50) NOT NULL,
-    [profile_liked] INT NOT NULL,
+    [like_id]		INT			 IDENTITY (1, 1) NOT NULL,
+    [liked_user]    VARCHAR	(50) NOT NULL,
+    [profile_liked] VARCHAR (50) NOT NULL,
     PRIMARY KEY CLUSTERED ([like_id] ASC),
     FOREIGN KEY ([profile_liked]) REFERENCES [dbo].[Profile] ([id]),
     FOREIGN KEY ([liked_user]) REFERENCES [dbo].[Users] ([username])

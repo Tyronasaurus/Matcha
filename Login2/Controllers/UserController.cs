@@ -61,6 +61,8 @@ namespace Login2.Controllers
                 {
                     if (Session["Usertoken"] != null)
                     {
+                        System.Diagnostics.Debug.WriteLine("USER TOKEN " + Session["Usertoken"].ToString());
+
                         user = user.getUserInfo(user.Username);
 
                         string body = "Please follow this link to verify your account http://" +
@@ -70,19 +72,21 @@ namespace Login2.Controllers
 
                         var sendMail = new Models.SendMail.SendMail();
                         bool sent = sendMail.SendEmail(user.Email, subject, body);
-
-                        if (sent)
-                        {
-                            TempData["user"] = user;
-                            return RedirectToAction("EmailSent", "User");
-                        }
-                        else
-                        {
-                            return RedirectToAction("Index", "Home");
-                        }
-
+                        ModelState.AddModelError("", "Account has not yet been verified. Please check your mail");
+                        //if (sent)
+                        //{
+                        //    TempData["user"] = user;
+                        //    ModelState.AddModelError("", "Account has not yet been verified. Please check your mail");
+                        //    return RedirectToAction("EmailSent", "User");
+                        //}
+                        //else
+                        //{
+                        //    ModelState.AddModelError("", "Failed to resend the message. I dont know why");
+                        //    return RedirectToAction("Index", "Home");
+                        //}
                     }
-                    ModelState.AddModelError("", "Failed to login. Please try again");
+                    else
+                        ModelState.AddModelError("", "Failed to login. Please try again");
                 }
             }
             return View(user);

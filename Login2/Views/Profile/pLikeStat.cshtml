@@ -1,0 +1,6 @@
+﻿@using (Html.BeginForm("LikeClicked", "Like",
+           new { @liked_Profile = ViewBag.likedProf }
+           , FormMethod.Post))
+{
+    <input type="submit" value="Like" />
+}

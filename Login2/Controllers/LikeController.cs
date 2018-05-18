@@ -24,10 +24,14 @@ namespace Login2.Controllers
         [HttpPost]
         public ActionResult LikeClicked (string liked_Profile)
         {
-            System.Diagnostics.Debug.WriteLine("Inside Like Post");
+            Like likeModel = new Like();
+            Profile profile = new Profile();
+            System.Diagnostics.Debug.WriteLine("Inside Like Post " + liked_Profile );
             SqlDataReader reader = null;
             SqlConnection cn = null;
             SqlCommand cmd = null;
+            string _sql = null;
+            bool LikeStat = true;
 
             if (Session["Username"] == null)
             {
@@ -39,16 +43,26 @@ namespace Login2.Controllers
             try
             {
                 cn = new SqlConnection(Constants.ConnString);
-                string _sql = @"SELECT * FROM Likes WHERE liked_user = @liked_user AND profile = @profile";
-                cmd = new SqlCommand(_sql, cn);
-                cmd.Parameters.AddWithValue("@liked_user", liked_User);
-                cmd.Parameters.AddWithValue("@profile", liked_Profile);
-                cn.Open();
-                reader = cmd.ExecuteReader();
-                if (!reader.HasRows)
+                LikeStat = likeModel.LikeUnlike(liked_Profile, liked_User);
+
+
+                if (LikeStat == true)
                 {
+                    //LIKES
                     cn.Close();
-                    _sql = @"INSERT INTO Likes (liked_user, profile) VALUES (@liked_user, @profile)";
+                    _sql = @"INSERT INTO Likes (liked_user, profile_liked) VALUES (@liked_user, @profile)";
+                    cmd = new SqlCommand(_sql, cn);
+                    cmd.Parameters.AddWithValue("@liked_user", liked_User);
+                    cmd.Parameters.AddWithValue("@profile", liked_Profile);
+                    cn.Open();
+                    reader = cmd.ExecuteReader();
+                    SendMailLike(liked_Profile, liked_User);
+                }
+                else
+                {
+                    //UNLIKES
+                    cn.Close();
+                    _sql = @"DELETE FROM Likes WHERE liked_user = @liked_user AND profile_liked = @profile";
                     cmd = new SqlCommand(_sql, cn);
                     cmd.Parameters.AddWithValue("@liked_user", liked_User);
                     cmd.Parameters.AddWithValue("@profile", liked_Profile);
@@ -60,9 +74,9 @@ namespace Login2.Controllers
             {
                 System.Diagnostics.Debug.WriteLine(e.Message);
             }
-            SendMailLike(liked_Profile, liked_User);
-            System.Diagnostics.Debug.WriteLine(liked_User + " likes " + liked_Profile);
-            return Redirect(Request.Url.Authority + "?Username=" + liked_Profile);
+            System.Diagnostics.Debug.WriteLine(liked_User + " " + LikeStat + " " + liked_Profile);
+
+            return RedirectToAction("SingleProfileView", "Profile", new { Username = liked_Profile });
         }
 
 

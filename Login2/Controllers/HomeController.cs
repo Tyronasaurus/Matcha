@@ -24,22 +24,25 @@ namespace Login2.Controllers
             return View();
         }
 
-        [HttpGet]
         public ActionResult Browse()
         {
             SqlDataReader reader = null;
             SqlConnection cn = null;
             SqlCommand cmd = null;
-
+            var userProfile = new Profile();
             var ProfList = new List<Profile>();
             ProfileController profcontroller = new ProfileController();
 
+            userProfile = profcontroller.ReturnProfile(Session["Username"].ToString());
+            System.Diagnostics.Debug.WriteLine("Inside Browse Action");
+
             try
             {
+                string _sql = @"SELECT * FROM Profile WHERE username != @username AND sexPref = @sexPref";
                 cn = new SqlConnection(Constants.ConnString);
-                string _sql = @"SELECT * FROM Profile WHERE username <> @username";
                 cmd = new SqlCommand(_sql, cn);
-                cmd.Parameters.AddWithValue("@username", Session["Username"]);
+                cmd.Parameters.AddWithValue("@username", userProfile.Username);
+                cmd.Parameters.AddWithValue("@sexPref", userProfile.SexPref);
                 cn.Open();
                 reader = cmd.ExecuteReader();
                 while (reader.Read())
@@ -52,16 +55,19 @@ namespace Login2.Controllers
             {
                 System.Diagnostics.Debug.WriteLine(e.Message);
             }
-            if (ProfList == null)
+            finally 
             {
-                ViewBag.ProfileList = ProfList;
+                if (ProfList != null)
+                {
+                    ViewBag.ProfileList = ProfList;
+                }
+                else
+                {
+                    ViewBag.ProfileList = null;
+                    ViewBag.ErrorMEssage = "No users";
+                }
+                cn.Close();
             }
-            else
-            {
-                ViewBag.ProfileList = null;
-                ViewBag.ErrorMEssage = "No users";
-            }
-            cn.Close();
             return View();
         }
 
@@ -123,9 +129,9 @@ namespace Login2.Controllers
             string _sql = null;
 
             if (IO == true)
-                _sql = @"UPDATE Users SET online = 1 WHERE username = @username";
+                _sql = @"UPDATE Profile SET online = 1 WHERE username = @username";
             else if (IO == false)
-                _sql = @"UPDATE Users SET online = 0 WHERE username = @username";
+                _sql = @"UPDATE Profile SET online = 0 WHERE username = @username";
 
             try
             {
